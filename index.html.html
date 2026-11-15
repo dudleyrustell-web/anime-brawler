@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANIME CLASH // 2P Street Fighter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Chakra+Petch:ital,wght@0,600;0,700;1,700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Chakra Petch', sans-serif;
+            background-color: #09090b;
+            color: #ffffff;
+            overflow: hidden;
+            user-select: none;
+        }
+        .font-anime {
+            font-family: 'Bangers', cursive;
+            letter-spacing: 0.06em;
+        }
+        .anime-border {
+            border: 3px solid #ffffff;
+            box-shadow: 4px 4px 0px #ef4444;
+        }
+        .anime-border-blue {
+            border: 3px solid #ffffff;
+            box-shadow: -4px 4px 0px #3b82f6;
+        }
+        .skew-panel {
+            transform: skewX(-10deg);
+        }
+        .unskew {
+            transform: skewX(10deg);
+        }
+        @keyframes pulseGlow {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.8)); }
+            50% { filter: drop-shadow(0 0 20px rgba(239, 68, 68, 1)); }
+        }
+        .super-ready {
+            animation: pulseGlow 0.8s infinite;
+        }
+        /* Custom Scrollbar for small screens if needed */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #ef4444; }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between bg-zinc-950">
+
+    <!-- TOP NAVIGATION / AUDIO BAR -->
+    <header class="w-full px-4 py-2 bg-zinc-900/90 border-b-2 border-red-600 flex justify-between items-center z-30">
+        <div class="flex items-center gap-3">
+            <span class="bg-red-600 text-white font-anime text-xl px-2 py-0.5 rounded skew-panel">2P ARCADE</span>
+            <h1 class="font-anime text-2xl sm:text-3xl tracking-wider text-yellow-400 drop-shadow-[0_2px_2px_rgba(0,0,0,0.9)]">
+                ANIME CLASH: STREET LEGENDS
+            </h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="btn-char-select" onclick="returnToSelect()" class="hidden px-3 py-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-500 rounded text-xs sm:text-sm font-bold uppercase transition">
+                Change Fighters
+            </button>
+            <button id="btn-mute" onclick="toggleMute()" class="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-500 rounded text-xs sm:text-sm font-bold flex items-center gap-1 transition">
+                <span id="mute-icon">🔊</span> <span id="mute-text">SFX ON</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="relative flex-1 w-full flex items-center justify-center overflow-hidden">
+
+        <!-- ========================================== -->
+        <!-- SCREEN 1: CHARACTER SELECT SCREEN          -->
+        <!-- ========================================== -->
+        <div id="select-screen" class="w-full h-full max-w-6xl mx-auto p-3 sm:p-6 flex flex-col justify-between z-20 overflow-y-auto">
+            
+            <div class="text-center mb-2">
+                <h2 class="font-anime text-3xl sm:text-5xl text-white tracking-wider drop-shadow-[0_3px_0_#dc2626]">
+                    CHOOSE YOUR FIGHTER
+                </h2>
+                <p class="text-xs sm:text-sm text-zinc-400 uppercase tracking-widest">
+                    Click a fighter card or use keyboard to lock in Player 1 (Left) &amp; Player 2 (Right)
+                </p>
+            </div>
+
+            <!-- P1 & P2 PREVIEW STAGE -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center my-auto">
+                
+                <!-- PLAYER 1 PREVIEW -->
+                <div class="bg-zinc-900/90 border-2 border-blue-500 rounded-xl p-3 flex flex-col items-center relative shadow-[0_0_25px_rgba(59,130,246,0.25)]">
+                    <div class="w-full flex justify-between items-center border-b border-zinc-700 pb-1 mb-2">
+                        <span class="bg-blue-600 text-white font-bold text-xs px-2 py-0.5 rounded">PLAYER 1 (LEFT)</span>
+                        <span id="p1-status" class="text-xs font-bold text-yellow-400 animate-pulse">SELECTING...</span>
+                    </div>
+                    <canvas id="p1-preview-canvas" width="180" height="170" class="bg-zinc-950/60 rounded-lg border border-zinc-800 mb-2"></canvas>
+                    <h3 id="p1-name" class="font-anime text-2xl sm:text-3xl text-blue-400">SULE</h3>
+                    <div class="text-xs text-zinc-300 text-center mb-2">
+                        SUPER: <span id="p1-super" class="text-yellow-400 font-bold">MUI THAI BARRAGE</span>
+                    </div>
+                    <!-- Stats -->
+                    <div class="w-full space-y-1 text-[11px]">
+                        <div class="flex justify-between"><span>POWER</span><span id="p1-stat-pwr" class="text-blue-400 font-bold">★★★☆☆</span></div>
+                        <div class="flex justify-between"><span>SPEED</span><span id="p1-stat-spd" class="text-blue-400 font-bold">★★★★★</span></div>
+                        <div class="flex justify-between"><span>REACH</span><span id="p1-stat-rch" class="text-blue-400 font-bold">★★☆☆☆</span></div>
+                    </div>
+                </div>
+
+                <!-- ROSTER GRID & READY BUTTON -->
+                <div class="flex flex-col items-center gap-3">
+                    <div id="roster-grid" class="grid grid-cols-2 gap-3 w-full">
+                        <!-- Roster cards injected by JS -->
+                    </div>
+
+                    <div class="flex gap-2 w-full mt-1">
+                        <button id="btn-p1-lock" onclick="toggleLock(1)" class="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg text-xs sm:text-sm uppercase shadow-lg transition">
+                            Lock P1 (F)
+                        </button>
+                        <button id="btn-p2-lock" onclick="toggleLock(2)" class="flex-1 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs sm:text-sm uppercase shadow-lg transition">
+                            Lock P2 (K)
+                        </button>
+                    </div>
+
+                    <button id="btn-start-fight" onclick="startMatch()" class="w-full py-3 bg-gradient-to-r from-yellow-500 via-orange-500 to-red-600 hover:from-yellow-400 hover:to-red-500 text-zinc-950 font-anime text-2xl sm:text-3xl tracking-wider rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.6)] transform hover:scale-105 transition">
+                        FIGHT! ⚔️
+                    </button>
+                </div>
+
+                <!-- PLAYER 2 PREVIEW -->
+                <div class="bg-zinc-900/90 border-2 border-red-500 rounded-xl p-3 flex flex-col items-center relative shadow-[0_0_25px_rgba(239,68,68,0.25)]">
+                    <div class="w-full flex justify-between items-center border-b border-zinc-700 pb-1 mb-2">
+                        <span class="bg-red-600 text-white font-bold text-xs px-2 py-0.5 rounded">PLAYER 2 (RIGHT)</span>
+                        <span id="p2-status" class="text-xs font-bold text-yellow-400 animate-pulse">SELECTING...</span>
+                    </div>
+                    <canvas id="p2-preview-canvas" width="180" height="170" class="bg-zinc-950/60 rounded-lg border border-zinc-800 mb-2"></canvas>
+                    <h3 id="p2-name" class="font-anime text-2xl sm:text-3xl text-red-400">ENZO</h3>
+                    <div class="text-xs text-zinc-300 text-center mb-2">
+                        SUPER: <span id="p2-super" class="text-yellow-400 font-bold">SUPLEX</span>
+                    </div>
+                    <!-- Stats -->
+                    <div class="w-full space-y-1 text-[11px]">
+                        <div class="flex justify-between"><span>POWER</span><span id="p2-stat-pwr" class="text-red-400 font-bold">★★★★★</span></div>
+                        <div class="flex justify-between"><span>SPEED</span><span id="p2-stat-spd" class="text-red-400 font-bold">★★☆☆☆</span></div>
+                        <div class="flex justify-between"><span>REACH</span><span id="p2-stat-rch" class="text-red-400 font-bold">★★★★☆</span></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CONTROL LEGEND FOOTER -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-zinc-900/80 border border-zinc-700 rounded-xl p-2.5 text-xs mt-2">
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                    <span class="font-bold text-blue-400">P1 CONTROLS:</span>
+                    <span class="bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-600">A/D Move</span>
+                    <span class="bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-600">W Jump</span>
+                    <span class="bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-600">S Block/Crouch</span>
+                    <span class="bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-600">F Punch</span>
+                    <span class="bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-600">G Kick</span>
+                    <span class="bg-yellow-500/20 text-yellow-300 px-1.5 py-0.5 rounded border border-yellow-500">R SUPER</span>
+                </div>
+                <div class="flex flex-wrap items-center justify-center sm:justify-end gap-2">
+                    <span class="font-bold text-red-400">P2 CONTROLS:</span>
+                    <span class="bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-600">◀/▶ Move</span>
+                    <span class="bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-600">▲ Jump</span>
+                    <span class="bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-600">▼ Block/Crouch</span>
+                    <span class="bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-600">K Punch</span>
+                    <span class="bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-600">L Kick</span>
+                    <span class="bg-yellow-500/20 text-yellow-300 px-1.5 py-0.5 rounded border border-yellow-500">P SUPER</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 2: FIGHT ARENA (CANVAS + HUD)       -->
+        <!-- ========================================== -->
+        <div id="arena-screen" class="hidden relative w-full h-full flex flex-col">
+            
+            <!-- TOP FIGHT HUD OVERLAY -->
+            <div class="w-full max-w-6xl mx-auto px-3 pt-2 pb-1 z-10 pointer-events-none">
+                <div class="flex items-center justify-between gap-2 sm:gap-4">
+                    
+                    <!-- P1 HEALTH & SUPER -->
+                    <div class="flex-1 flex flex-col">
+                        <div class="flex justify-between items-end mb-1">
+                            <span id="hud-p1-name" class="font-anime text-xl sm:text-2xl text-blue-400 tracking-wider drop-shadow">SULE</span>
+                            <span id="hud-p1-hp-text" class="text-xs font-bold text-zinc-300">1000 / 1000</span>
+                        </div>
+                        <!-- Health Bar -->
+                        <div class="w-full h-5 sm:h-6 bg-zinc-900 border-2 border-white rounded-sm overflow-hidden p-0.5 skew-panel">
+                            <div id="hud-p1-hp" class="h-full bg-gradient-to-r from-blue-600 via-cyan-400 to-emerald-400 transition-all duration-100" style="width: 100%;"></div>
+                        </div>
+                        <!-- Super Bar -->
+                        <div class="w-3/4 h-2.5 sm:h-3 bg-zinc-900 border border-zinc-500 rounded-sm overflow-hidden mt-1 skew-panel">
+                            <div id="hud-p1-super" class="h-full bg-gradient-to-r from-amber-500 to-yellow-300 transition-all duration-100" style="width: 0%;"></div>
+                        </div>
+                        <span id="hud-p1-super-ready" class="text-[10px] sm:text-xs font-bold text-yellow-400 mt-0.5 opacity-0">⚡ [R] SUPER READY!</span>
+                    </div>
+
+                    <!-- CENTER TIMER & ROUND -->
+                    <div class="flex flex-col items-center justify-center px-2">
+                        <span class="text-[10px] sm:text-xs font-bold text-red-500 uppercase tracking-widest">ROUND 1</span>
+                        <div id="hud-timer" class="font-anime text-4xl sm:text-5xl text-yellow-400 bg-zinc-900/90 border-2 border-yellow-500 px-3 py-0.5 rounded-lg shadow-lg">
+                            99
+                        </div>
+                    </div>
+
+                    <!-- P2 HEALTH & SUPER -->
+                    <div class="flex-1 flex flex-col items-end">
+                        <div class="w-full flex justify-between items-end mb-1">
+                            <span id="hud-p2-hp-text" class="text-xs font-bold text-zinc-300">1000 / 1000</span>
+                            <span id="hud-p2-name" class="font-anime text-xl sm:text-2xl text-red-400 tracking-wider drop-shadow">ENZO</span>
+                        </div>
+                        <!-- Health Bar (Right-aligned fill) -->
+                        <div class="w-full h-5 sm:h-6 bg-zinc-900 border-2 border-white rounded-sm overflow-hidden p-0.5 flex justify-end" style="transform: skewX(10deg);">
+                            <div id="hud-p2-hp" class="h-full bg-gradient-to-l from-red-600 via-orange-400 to-emerald-400 transition-all duration-100" style="width: 100%;"></div>
+                        </div>
+                        <!-- Super Bar -->
+                        <div class="w-3/4 h-2.5 sm:h-3 bg-zinc-900 border border-zinc-500 rounded-sm overflow-hidden mt-1 flex justify-end" style="transform: skewX(10deg);">
+                            <div id="hud-p2-super" class="h-full bg-gradient-to-l from-amber-500 to-yellow-300 transition-all duration-100" style="width: 0%;"></div>
+                        </div>
+                        <span id="hud-p2-super-ready" class="text-[10px] sm:text-xs font-bold text-yellow-400 mt-0.5 opacity-0">⚡ [P] SUPER READY!</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- MAIN GAME CANVAS CONTAINER -->
+            <div id="canvas-wrapper" class="relative flex-1 w-full overflow-hidden">
+                <canvas id="game-canvas" class="block w-full h-full"></canvas>
+
+                <!-- ANIME SUPER CUT-IN BANNER OVERLAY -->
+                <div id="super-cutin" class="hidden absolute inset-0 pointer-events-none flex items-center justify-center z-20 bg-black/60">
+                    <div id="super-banner-box" class="w-full py-6 bg-gradient-to-r from-red-700 via-yellow-500 to-red-700 border-y-4 border-white flex flex-col items-center justify-center transform -rotate-2 shadow-[0_0_50px_rgba(250,204,21,0.9)]">
+                        <span id="super-cutin-user" class="text-sm sm:text-lg font-bold uppercase tracking-widest text-zinc-950 bg-white px-3 py-0.5 rounded mb-1">SULE UNLEASHES</span>
+                        <h2 id="super-cutin-name" class="font-anime text-5xl sm:text-7xl text-white drop-shadow-[0_4px_0_#000]">MUI THAI BARRAGE!</h2>
+                    </div>
+                </div>
+
+                <!-- MATCH OVER / KO MODAL OVERLAY -->
+                <div id="ko-overlay" class="hidden absolute inset-0 z-30 bg-black/75 flex flex-col items-center justify-center p-4 text-center">
+                    <h2 id="ko-title" class="font-anime text-6xl sm:text-8xl text-yellow-400 drop-shadow-[0_5px_0_#dc2626] mb-2">
+                        K.O.!
+                    </h2>
+                    <p id="ko-subtitle" class="font-anime text-3xl sm:text-5xl text-white mb-6 tracking-wide">
+                        PLAYER 1 (SULE) WINS!
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <button onclick="rematch()" class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-zinc-950 font-anime text-2xl sm:text-3xl rounded-xl shadow-lg transform hover:scale-105 transition">
+                            REMATCH ↻
+                        </button>
+                        <button onclick="returnToSelect()" class="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 border-2 border-white text-white font-anime text-2xl sm:text-3xl rounded-xl shadow-lg transform hover:scale-105 transition">
+                            CHARACTER SELECT
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMPACT IN-GAME KEYBIND BAR -->
+            <div class="w-full bg-zinc-950/95 border-t border-zinc-800 px-3 py-1 flex flex-wrap justify-between items-center text-[10px] sm:text-xs text-zinc-400 z-10">
+                <div><strong class="text-blue-400">P1:</strong> [A/D] Move • [W] Jump • [S] Block • [F] Punch • [G] Kick • <span class="text-yellow-400 font-bold">[R] SUPER</span></div>
+                <div><strong class="text-red-400">P2:</strong> [◀/▶] Move • [▲] Jump • [▼] Block • [K] Punch • [L] Kick • <span class="text-yellow-400 font-bold">[P] SUPER</span></div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        /**
+         * ============================================================================
+         * 1. WEB AUDIO API RETRO SYNTHESIZER (NO EXTERNAL AUDIO URLS NEEDED)
+         * ============================================================================
+         */
+        let audioCtx = null;
+        let isMuted = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            document.getElementById('mute-icon').textContent = isMuted ? '🔇' : '🔊';
+            document.getElementById('mute-text').textContent = isMuted ? 'MUTED' : 'SFX ON';
+        }
+
+        function playSFX(type) {
+            if (isMuted) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'punch') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.exponentialRampToValueAtTime(55, now + 0.12);
+                gain.gain.setValueAtTime(0.35, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+                osc.start(now);
+                osc.stop(now + 0.12);
+            } else if (type === 'kick') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(160, now);
+                osc.frequency.exponentialRampToValueAtTime(35, now + 0.18);
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+                osc.start(now);
+                osc.stop(now + 0.18);
+            } else if (type === 'block') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(480, now);
+                osc.frequency.exponentialRampToValueAtTime(180, now + 0.09);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
+                osc.start(now);
+                osc.stop(now + 0.09);
+            } else if (type === 'jump') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(420, now + 0.16);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+                osc.start(now);
+                osc.stop(now + 0.16);
+            } else if (type === 'super') {
+                // Dramatic anime power-up sweep
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(110, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.45);
+                gain.gain.setValueAtTime(0.45, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
+                osc.start(now);
+                osc.stop(now + 0.55);
+            } else if (type === 'explosion') {
+                // Low rumble impact for Suplex / Shaker / Mugunchi
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(95, now);
+                osc.frequency.exponentialRampToValueAtTime(22, now + 0.45);
+                gain.gain.setValueAtTime(0.6, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+                osc.start(now);
+                osc.stop(now + 0.45);
+            } else if (type === 'select') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(520, now);
+                osc.frequency.setValueAtTime(680, now + 0.05);
+                gain.gain.setValueAtTime(0.18, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+                osc.start(now);
+                osc.stop(now + 0.12);
+            } else if (type === 'ko') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.linearRampToValueAtTime(60, now + 0.8);
+                gain.gain.setValueAtTime(0.5, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.85);
+                osc.start(now);
+                osc.stop(now + 0.85);
+            }
+        }
+
+        /**
+         * ============================================================================
+         * 2. CHARACTER ROSTER DEFINITIONS & PHYSICAL TRAITS
+         * ============================================================================
+         * Exact specifications from user prompt:
+         * - Sule: Small stature, dark complexion. Super: "Mui Thai Barrage"
+         * - Noorain: Tall stature, dark complexion, wears glasses. Super: "Mugunchi"
+         * - Enzo: Muscular build, dark complexion. Super: "Suplex"
+         * - Ahmad: Normal build, light complexion. Super: "Shaker"
+         */
+        const ROSTER = {
+            sule: {
+                id: 'sule',
+                name: 'SULE',
+                superName: 'MUI THAI BARRAGE',
+                desc: 'Small & lightning-fast Muay Thai prodigy.',
+                skinColor: '#5c3824',      // Dark complexion
+                skinShadow: '#3e2315',
+                hairColor: '#111111',
+                outfitPrimary: '#dc2626',  // Crimson Muay Thai shorts & wraps
+                outfitSecondary: '#facc15',
+                accentColor: '#f97316',
+                // Physical proportions
+                heightScale: 0.80,         // Small stature
+                widthScale: 0.88,
+                muscular: false,
+                hasGlasses: false,
+                headband: true,
+                // Combat attributes
+                maxHp: 920,
+                speed: 6.4,
+                jumpPower: -15.5,
+                punchDmg: 48,
+                kickDmg: 68,
+                reachMult: 0.88,
+                stats: { pwr: '★★★☆☆', spd: '★★★★★', rch: '★★☆☆☆' }
+            },
+            noorain: {
+                id: 'noorain',
+                name: 'NOORAIN',
+                superName: 'MUGUNCHI',
+                desc: 'Tall tactician with sharp glasses & lethal precision.',
+                skinColor: '#52301e',      // Dark complexion
+                skinShadow: '#361d11',
+                hairColor: '#0f172a',
+                outfitPrimary: '#1d4ed8',  // Sleek anime high-collar coat
+                outfitSecondary: '#38bdf8',
+                accentColor: '#38bdf8',
+                // Physical proportions
+                heightScale: 1.18,         // Tall stature
+                widthScale: 0.94,
+                muscular: false,
+                hasGlasses: true,          // Prominent anime glasses
+                headband: false,
+                // Combat attributes
+                maxHp: 980,
+                speed: 5.2,
+                jumpPower: -14.5,
+                punchDmg: 55,
+                kickDmg: 75,
+                reachMult: 1.22,
+                stats: { pwr: '★★★★☆', spd: '★★★☆☆', rch: '★★★★★' }
+            },
+            enzo: {
+                id: 'enzo',
+                name: 'ENZO',
+                superName: 'SUPLEX',
+                desc: 'Muscular powerhouse who crushes foes into the ground.',
+                skinColor: '#4a2b1b',      // Dark complexion
+                skinShadow: '#2f1a0f',
+                hairColor: '#18181b',
+                outfitPrimary: '#15803d',  // Heavyweight grappler gear
+                outfitSecondary: '#eab308',
+                accentColor: '#22c55e',
+                // Physical proportions
+                heightScale: 1.08,
+                widthScale: 1.38,          // Broad, muscular build
+                muscular: true,
+                hasGlasses: false,
+                headband: false,
+                // Combat attributes
+                maxHp: 1150,
+                speed: 4.1,
+                jumpPower: -13.2,
+                punchDmg: 72,
+                kickDmg: 92,
+                reachMult: 1.12,
+                stats: { pwr: '★★★★★', spd: '★★☆☆☆', rch: '★★★★☆' }
+            },
+            ahmad: {
+                id: 'ahmad',
+                name: 'AHMAD',
+                superName: 'SHAKER',
+                desc: 'Balanced anime martial artist with seismic shockwaves.',
+                skinColor: '#f1c29b',      // Light complexion
+                skinShadow: '#d49b72',
+                hairColor: '#27272a',
+                outfitPrimary: '#f8fafc',  // Classic white/purple anime gi
+                outfitSecondary: '#9333ea',
+                accentColor: '#a855f7',
+                // Physical proportions
+                heightScale: 1.00,         // Normal/average build
+                widthScale: 1.00,
+                muscular: false,
+                hasGlasses: false,
+                headband: false,
+                // Combat attributes
+                maxHp: 1000,
+                speed: 5.1,
+                jumpPower: -14.5,
+                punchDmg: 58,
+                kickDmg: 78,
+                reachMult: 1.00,
+                stats: { pwr: '★★★★☆', spd: '★★★★☆', rch: '★★★☆☆' }
+            }
+        };
+
+        const ROSTER_KEYS = ['sule', 'noorain', 'enzo', 'ahmad'];
+
+        /**
+         * ============================================================================
+         * 3. CHARACTER SELECT STATE & UI RENDERING
+         * ============================================================================
+         */
+        let p1Selected = 'sule';
+        let p2Selected = 'enzo';
+        let p1Locked = false;
+        let p2Locked = false;
+        let activeSelectorTurn = 1; // Alternates on mouse click for easy 1-mouse selection too
+
+        function buildRosterUI() {
+            const grid = document.getElementById('roster-grid');
+            grid.innerHTML = '';
+
+            ROSTER_KEYS.forEach(key => {
+                const char = ROSTER[key];
+                const card = document.createElement('div');
+                card.id = `card-${key}`;
+                card.onclick = () => handleCardClick(key);
+                card.className = `cursor-pointer bg-zinc-900 hover:bg-zinc-800 border-2 border-zinc-700 rounded-xl p-2.5 flex flex-col items-center transition transform hover:scale-105 relative`;
+
+                card.innerHTML = `
+                    <div class="w-full flex justify-between items-center text-[10px] font-bold mb-1">
+                        <span id="badge-p1-${key}" class="hidden bg-blue-600 text-white px-1.5 rounded">P1</span>
+                        <span class="text-zinc-500 ml-auto">${char.id === 'sule' ? 'SMALL' : char.id === 'enzo' ? 'MUSCULAR' : char.id === 'noorain' ? 'TALL' : 'NORMAL'}</span>
+                        <span id="badge-p2-${key}" class="hidden bg-red-600 text-white px-1.5 rounded ml-1">P2</span>
+                    </div>
+                    <canvas id="thumb-${key}" width="90" height="85" class="mb-1"></canvas>
+                    <span class="font-anime text-xl tracking-wide text-white">${char.name}</span>
+                    <span class="text-[10px] text-yellow-400 font-bold truncate max-w-full">${char.superName}</span>
+                `;
+                grid.appendChild(card);
+
+                // Draw static portrait on thumbnail canvas
+                const thumbCanvas = document.getElementById(`thumb-${key}`);
+                const tCtx = thumbCanvas.getContext('2d');
+                drawAnimeCharacter(tCtx, char, 45, 80, 1, 0, 'idle', 0, false);
+            });
+
+            updateSelectPreviews();
+        }
+
+        function handleCardClick(charKey) {
+            playSFX('select');
+            if (!p1Locked && activeSelectorTurn === 1) {
+                p1Selected = charKey;
+                if (!p2Locked) activeSelectorTurn = 2;
+            } else if (!p2Locked) {
+                p2Selected = charKey;
+                if (!p1Locked) activeSelectorTurn = 1;
+            } else if (!p1Locked) {
+                p1Selected = charKey;
+            }
+            updateSelectPreviews();
+        }
+
+        function toggleLock(playerNum) {
+            playSFX('select');
+            if (playerNum === 1) {
+                p1Locked = !p1Locked;
+                if (p1Locked && !p2Locked) activeSelectorTurn = 2;
+            } else {
+                p2Locked = !p2Locked;
+                if (p2Locked && !p1Locked) activeSelectorTurn = 1;
+            }
+            updateSelectPreviews();
+        }
+
+        function updateSelectPreviews() {
+            // Update badges on cards
+            ROSTER_KEYS.forEach(key => {
+                const b1 = document.getElementById(`badge-p1-${key}`);
+                const b2 = document.getElementById(`badge-p2-${key}`);
+                const card = document.getElementById(`card-${key}`);
+
+                b1.classList.toggle('hidden', p1Selected !== key);
+                b2.classList.toggle('hidden', p2Selected !== key);
+
+                card.classList.remove('border-blue-500', 'border-red-500', 'border-purple-500');
+                if (p1Selected === key && p2Selected === key) {
+                    card.classList.add('border-purple-500');
+                } else if (p1Selected === key) {
+                    card.classList.add('border-blue-500');
+                } else if (p2Selected === key) {
+                    card.classList.add('border-red-500');
+                }
+            });
+
+            // Update P1 Preview Panel
+            const c1 = ROSTER[p1Selected];
+            document.getElementById('p1-name').textContent = c1.name;
+            document.getElementById('p1-super').textContent = c1.superName;
+            document.getElementById('p1-stat-pwr').textContent = c1.stats.pwr;
+            document.getElementById('p1-stat-spd').textContent = c1.stats.spd;
+            document.getElementById('p1-stat-rch').textContent = c1.stats.rch;
+            document.getElementById('p1-status').textContent = p1Locked ? '✔ READY!' : 'SELECTING...';
+            document.getElementById('p1-status').className = p1Locked ? 'text-xs font-bold text-emerald-400' : 'text-xs font-bold text-yellow-400 animate-pulse';
+            document.getElementById('btn-p1-lock').textContent = p1Locked ? 'Unlock P1 (F)' : 'Lock P1 (F)';
+
+            // Update P2 Preview Panel
+            const c2 = ROSTER[p2Selected];
+            document.getElementById('p2-name').textContent = c2.name;
+            document.getElementById('p2-super').textContent = c2.superName;
+            document.getElementById('p2-stat-pwr').textContent = c2.stats.pwr;
+            document.getElementById('p2-stat-spd').textContent = c2.stats.spd;
+            document.getElementById('p2-stat-rch').textContent = c2.stats.rch;
+            document.getElementById('p2-status').textContent = p2Locked ? '✔ READY!' : 'SELECTING...';
+            document.getElementById('p2-status').className = p2Locked ? 'text-xs font-bold text-emerald-400' : 'text-xs font-bold text-yellow-400 animate-pulse';
+            document.getElementById('btn-p2-lock').textContent = p2Locked ? 'Unlock P2 (K)' : 'Lock P2 (K)';
+        }
+
+        // Animate preview canvases on Character Select Screen
+        let previewAnimFrame = 0;
+        function animateSelectPreviews() {
+            if (!document.getElementById('select-screen').classList.contains('hidden')) {
+                previewAnimFrame++;
+                const p1Canvas = document.getElementById('p1-preview-canvas');
+                const p1Ctx = p1Canvas.getContext('2d');
+                p1Ctx.clearRect(0, 0, p1Canvas.width, p1Canvas.height);
+                drawAnimeCharacter(p1Ctx, ROSTER[p1Selected], 90, 155, 1, previewAnimFrame, 'idle', 0, false);
+
+                const p2Canvas = document.getElementById('p2-preview-canvas');
+                const p2Ctx = p2Canvas.getContext('2d');
+                p2Ctx.clearRect(0, 0, p2Canvas.width, p2Canvas.height);
+                drawAnimeCharacter(p2Ctx, ROSTER[p2Selected], 90, 155, -1, previewAnimFrame, 'idle', 0, false);
+            }
+            requestAnimationFrame(animateSelectPreviews);
+        }
+
+        /**
+         * ============================================================================
+         * 4. PROCEDURAL ANIME CHARACTER ART RENDERER (HTML5 CANVAS)
+         * ============================================================================
+         * Renders distinct silhouettes, skin tones, glasses, muscles, and animations.
+         */
+        function drawAnimeCharacter(ctx, char, x, y, facing, tick, state, stateTimer, isBlocking) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(facing, 1);
+
+            const hScale = char.heightScale;
+            const wScale = char.widthScale;
+            const bob = (state === 'idle' || state === 'walk') ? Math.sin(tick * 0.14) * 3 : 0;
+            const crouchOffset = (state === 'crouch' || isBlocking) ? 18 * hScale : 0;
+
+            // Ground shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 26 * wScale, 7, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Super Aura if active
+            if (state === 'super') {
+                ctx.save();
+                ctx.strokeStyle = char.accentColor;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(0, -45 * hScale, 52 + Math.sin(tick * 0.8) * 8, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // Dimensions based on character build
+            const legHeight = 36 * hScale - crouchOffset * 0.5;
+            const torsoHeight = 38 * hScale - crouchOffset * 0.5;
+            const torsoWidth = 24 * wScale;
+            const headRadius = char.id === 'sule' ? 13 : 14;
+
+            const hipY = -legHeight;
+            const shoulderY = hipY - torsoHeight + bob;
+            const headY = shoulderY - headRadius - 3;
+
+            // --- BACK ARM ---
+            ctx.save();
+            ctx.translate(6 * wScale, shoulderY + 6);
+            let backArmAngle = -0.35;
+            if (state === 'punch' && stateTimer % 10 > 4) backArmAngle = -1.4;
+            if (isBlocking) backArmAngle = -1.1;
+            ctx.rotate(backArmAngle);
+            drawLimb(ctx, 0, 0, 10 * wScale, 26 * hScale, char.skinShadow, char.outfitSecondary);
+            ctx.restore();
+
+            // --- LEGS ---
+            const walkSwing = state === 'walk' ? Math.sin(tick * 0.28) * 0.45 : 0;
+            
+            // Back Leg
+            ctx.save();
+            ctx.translate(-5 * wScale, hipY);
+            ctx.rotate(-walkSwing + (state === 'crouch' ? 0.35 : 0));
+            drawLeg(ctx, 0, 0, 11 * wScale, legHeight, char.outfitPrimary, char.skinShadow);
+            ctx.restore();
+
+            // Front Leg (extends high on Kick or Mui Thai Barrage)
+            ctx.save();
+            ctx.translate(6 * wScale, hipY);
+            let frontLegAngle = walkSwing - (state === 'crouch' ? 0.35 : 0);
+            if (state === 'kick') {
+                frontLegAngle = -1.45; // High anime roundhouse kick
+            } else if (state === 'super' && char.id === 'sule') {
+                frontLegAngle = -1.2 - Math.sin(tick * 1.4) * 0.5; // Rapid Muay Thai knees/kicks
+            }
+            ctx.rotate(frontLegAngle);
+            drawLeg(ctx, 0, 0, 11.5 * wScale, legHeight * (state === 'kick' ? 1.25 : 1), char.outfitPrimary, char.skinColor);
+            ctx.restore();
+
+            // --- TORSO ---
+            ctx.save();
+            ctx.fillStyle = char.id === 'enzo' ? char.skinColor : char.outfitPrimary;
+            ctx.strokeStyle = '#09090b';
+            ctx.lineWidth = 2.5;
+
+            ctx.beginPath();
+            if (char.muscular) {
+                // Enzo: Broad V-taper muscular chest
+                ctx.moveTo(-torsoWidth * 0.65, shoulderY);
+                ctx.lineTo(torsoWidth * 0.65, shoulderY);
+                ctx.lineTo(torsoWidth * 0.42, hipY);
+                ctx.lineTo(-torsoWidth * 0.42, hipY);
+            } else {
+                ctx.roundRect(-torsoWidth / 2, shoulderY, torsoWidth, torsoHeight, 6);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Muscular chest definition lines for Enzo
+            if (char.muscular) {
+                ctx.strokeStyle = char.skinShadow;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, shoulderY + 4);
+                ctx.lineTo(0, shoulderY + 18);
+                ctx.moveTo(-11, shoulderY + 16);
+                ctx.lineTo(11, shoulderY + 16);
+                ctx.stroke();
+            }
+
+            // Belt / Sash / Collar accents
+            ctx.fillStyle = char.outfitSecondary;
+            ctx.fillRect(-torsoWidth * 0.45, hipY - 5, torsoWidth * 0.9, 6);
+            ctx.restore();
+
+            // --- HEAD & ANIME FACE ---
+            ctx.save();
+            ctx.translate(2, headY);
+
+            // Face base
+            ctx.fillStyle = char.skinColor;
+            ctx.strokeStyle = '#09090b';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Anime Spiky Hair
+            ctx.fillStyle = char.hairColor;
+            ctx.beginPath();
+            ctx.moveTo(-headRadius - 2, -2);
+            ctx.lineTo(-headRadius - 5, -12);
+            ctx.lineTo(-4, -headRadius - 7);
+            ctx.lineTo(3, -headRadius - 10);
+            ctx.lineTo(11, -headRadius - 5);
+            ctx.lineTo(headRadius + 4, -4);
+            ctx.lineTo(headRadius - 2, -5);
+            ctx.lineTo(0, -headRadius + 2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Sule's Red Muay Thai Headband (Mongkhon)
+            if (char.headband) {
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(-headRadius, -6, headRadius * 2, 4.5);
+                // Flowing headband tail
+                ctx.beginPath();
+                ctx.moveTo(-headRadius, -4);
+                ctx.lineTo(-headRadius - 12, -1 + Math.sin(tick * 0.3) * 3);
+                ctx.lineTo(-headRadius - 10, 4 + Math.sin(tick * 0.3) * 3);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            // Fierce Anime Eye
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(3, -3, 6, 3.5);
+            ctx.fillStyle = '#09090b';
+            ctx.fillRect(6, -3, 3, 3.5);
+            // Angry eyebrow
+            ctx.strokeStyle = '#09090b';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(2, -5);
+            ctx.lineTo(10, -3);
+            ctx.stroke();
+
+            // Noorain's Prominent Glasses!
+            if (char.hasGlasses) {
+                ctx.strokeStyle = '#ffffff';
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.35)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.rect(1, -5, 10, 6);
+                ctx.fill();
+                ctx.stroke();
+                // Glasses arm
+                ctx.beginPath();
+                ctx.moveTo(-7, -3);
+                ctx.lineTo(1, -3);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // --- FRONT ARM (PUNCHING / BLOCKING) ---
+            ctx.save();
+            ctx.translate(-3 * wScale, shoulderY + 6);
+            let frontArmAngle = 0.25;
+            let armLen = 26 * hScale;
+
+            if (isBlocking) {
+                frontArmAngle = -1.65; // Guard up in front of face
+            } else if (state === 'punch') {
+                frontArmAngle = -1.55;
+                armLen = 34 * char.reachMult;
+            } else if (state === 'super' && char.id === 'sule') {
+                frontArmAngle = -1.55;
+                armLen = 32 + Math.cos(tick * 1.6) * 10; // Rapid barrage fists
+            } else if (state === 'super' && char.id === 'ahmad') {
+                frontArmAngle = 0.2; // Ground slam pose
+            }
+
+            ctx.rotate(frontArmAngle);
+            drawLimb(ctx, 0, 0, 11 * wScale, armLen, char.skinColor, char.outfitSecondary);
+            ctx.restore();
+
+            // --- BLOCK SHIELD VISUAL ---
+            if (isBlocking) {
+                ctx.strokeStyle = '#38bdf8';
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.22)';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(16, -42 * hScale, 28 * hScale, -Math.PI * 0.45, Math.PI * 0.45);
+                ctx.stroke();
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        function drawLimb(ctx, x, y, width, length, skinColor, wrapColor) {
+            ctx.fillStyle = skinColor;
+            ctx.strokeStyle = '#09090b';
+            ctx.lineWidth = 2.2;
+            ctx.beginPath();
+            ctx.roundRect(x - width / 2, y, width, length, 5);
+            ctx.fill();
+            ctx.stroke();
+
+            // Fist / Hand wrap
+            ctx.fillStyle = wrapColor;
+            ctx.beginPath();
+            ctx.arc(x, y + length, width * 0.62, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        function drawLeg(ctx, x, y, width, length, pantsColor, footColor) {
+            ctx.fillStyle = pantsColor;
+            ctx.strokeStyle = '#09090b';
+            ctx.lineWidth = 2.2;
+            ctx.beginPath();
+            ctx.roundRect(x - width / 2, y, width, length * 0.72, 4);
+            ctx.fill();
+            ctx.stroke();
+
+            // Lower shin / foot
+            ctx.fillStyle = footColor;
+            ctx.beginPath();
+            ctx.roundRect(x - width * 0.42, y + length * 0.7, width * 0.85, length * 0.3, 4);
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        /**
+         * ============================================================================
+         * 5. CORE FIGHTING ENGINE, PHYSICS, HITBOXES & SUPER MOVES
+         * ============================================================================
+         */
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+
+        const GRAVITY = 0.78;
+        let groundY = 420;
+        let arenaWidth = 900;
+        let arenaHeight = 500;
+
+        let gameActive = false;
+        let matchTimer = 99;
+        let timerInterval = null;
+        let globalTick = 0;
+        let hitStopFrames = 0;
+        let screenShake = 0;
+        let superFreezeTimer = 0;
+
+        let particles = [];
+        let projectiles = [];
+        let floatingTexts = [];
+
+        const keys = {};
+
+        class Fighter {
+            constructor(playerNum, charData, startX, facing) {
+                this.playerNum = playerNum;
+                this.char = charData;
+                this.x = startX;
+                this.y = groundY;
+                this.vx = 0;
+                this.vy = 0;
+                this.facing = facing; // 1 = right, -1 = left
+
+                this.hp = charData.maxHp;
+                this.maxHp = charData.maxHp;
+                this.superMeter = 0; // 0 to 100
+                this.maxSuper = 100;
+
+                this.state = 'idle'; // idle, walk, jump, crouch, punch, kick, hitstun, super
+                this.stateTimer = 0;
+                this.hasHitThisAttack = false;
+                this.isBlocking = false;
+                this.superHitsLeft = 0;
+            }
+
+            get isGrounded() {
+                return this.y >= groundY;
+            }
+
+            get hitbox() {
+                const h = (this.state === 'crouch' || this.isBlocking ? 65 : 92) * this.char.heightScale;
+                const w = 44 * this.char.widthScale;
+                return {
+                    x: this.x - w / 2,
+                    y: this.y - h,
+                    w: w,
+                    h: h
+                };
+            }
+
+            triggerAttack(type) {
+                if (this.state === 'hitstun' || this.state === 'super' || this.state === 'punch' || this.state === 'kick') return;
+                this.state = type;
+                this.stateTimer = type === 'punch' ? 16 : 22;
+                this.hasHitThisAttack = false;
+                playSFX(type);
+            }
+
+            triggerSuper(opponent) {
+                if (this.superMeter < this.maxSuper || this.state === 'hitstun' || this.state === 'super') return;
+
+                this.superMeter = 0;
+                this.state = 'super';
+                this.hasHitThisAttack = false;
+                playSFX('super');
+
+                // Show dramatic anime cut-in banner
+                showSuperCutIn(this.char.name, this.char.superName);
+                superFreezeTimer = 42; // Dramatic pause before unleashing
+
+                // Configure character-specific Super Move!
+                if (this.char.id === 'sule') {
+                    // SULE: MUI THAI BARRAGE (Dash forward + 6-hit rapid knee/elbow/kick combo)
+                    this.stateTimer = 55;
+                    this.superHitsLeft = 6;
+                } else if (this.char.id === 'noorain') {
+                    // NOORAIN: MUGUNCHI (High-speed anime energy beam/slash wave across screen)
+                    this.stateTimer = 38;
+                    projectiles.push({
+                        owner: this.playerNum,
+                        x: this.x + this.facing * 45,
+                        y: this.y - 52,
+                        vx: this.facing * 16,
+                        radius: 36,
+                        damage: 280,
+                        color: '#38bdf8',
+                        name: 'MUGUNCHI'
+                    });
+                } else if (this.char.id === 'enzo') {
+                    // ENZO: SUPLEX (High-speed grab dash -> launches & slams opponent with earthquake)
+                    this.stateTimer = 45;
+                    this.vx = this.facing * 18;
+                } else if (this.char.id === 'ahmad') {
+                    // AHMAD: SHAKER (Seismic ground-pound shockwave traveling along the floor)
+                    this.stateTimer = 40;
+                    screenShake = 22;
+                    playSFX('explosion');
+                    spawnShockwave(this.x, groundY, '#a855f7');
+                    projectiles.push({
+                        owner: this.playerNum,
+                        x: this.x + this.facing * 30,
+                        y: groundY - 25,
+                        vx: this.facing * 12,
+                        radius: 48,
+                        damage: 270,
+                        color: '#a855f7',
+                        name: 'SHAKER'
+                    });
+                }
+            }
+
+            update(opponent) {
+                // Face opponent automatically when idle/walking
+                if (this.state === 'idle' || this.state === 'walk' || this.state === 'crouch') {
+                    this.facing = opponent.x >= this.x ? 1 : -1;
+                }
+
+                // Handle active states
+                if (this.stateTimer > 0) {
+                    this.stateTimer--;
+
+                    // Special Super Move continuous logic
+                    if (this.state === 'super') {
+                        if (this.char.id === 'sule') {
+                            // Sule dashes in and unleashes rapid Muay Thai strikes
+                            const dist = Math.abs(opponent.x - this.x);
+                            if (dist > 55) {
+                                this.x += this.facing * 9;
+                            }
+                            if (this.stateTimer % 7 === 0 && this.superHitsLeft > 0) {
+                                this.superHitsLeft--;
+                                playSFX('kick');
+                                spawnParticles(opponent.x, opponent.y - 45, '#f97316', 12);
+                                screenShake = 8;
+                                if (dist < 115) {
+                                    opponent.takeDamage(46, this.facing * 4, -3, true);
+                                    spawnFloatingText(opponent.x, opponent.y - 90, 'BARRAGE!', '#facc15');
+                                }
+                            }
+                        } else if (this.char.id === 'enzo') {
+                            // Enzo Suplex grab check
+                            const dist = Math.abs(opponent.x - this.x);
+                            if (!this.hasHitThisAttack && dist < 75) {
+                                this.hasHitThisAttack = true;
+                                this.vx = 0;
+                                playSFX('explosion');
+                                screenShake = 28;
+                                hitStopFrames = 10;
+                                // Slam opponent!
+                                opponent.y = groundY - 80;
+                                opponent.takeDamage(295, this.facing * 10, -14, true);
+                                spawnShockwave(opponent.x, groundY, '#22c55e');
+                                spawnParticles(opponent.x, groundY - 20, '#eab308', 30);
+                                spawnFloatingText(opponent.x, opponent.y - 100, 'SUPLEX SLAM!!', '#22c55e');
+                            }
+                        }
+                    }
+
+                    // Active hitbox window for normal Punch & Kick
+                    if ((this.state === 'punch' || this.state === 'kick') && !this.hasHitThisAttack) {
+                        if (this.stateTimer <= 11 && this.stateTimer >= 5) {
+                            this.checkMeleeHit(opponent);
+                        }
+                    }
+
+                    if (this.stateTimer <= 0) {
+                        this.state = this.isGrounded ? 'idle' : 'jump';
+                    }
+                }
+
+                // Movement & Controls (when not locked in attack/hitstun/super)
+                const canAct = (this.state === 'idle' || this.state === 'walk' || this.state === 'jump' || this.state === 'crouch');
+                this.isBlocking = false;
+
+                if (canAct) {
+                    const leftKey = this.playerNum === 1 ? keys['KeyA'] : keys['ArrowLeft'];
+                    const rightKey = this.playerNum === 1 ? keys['KeyD'] : keys['ArrowRight'];
+                    const upKey = this.playerNum === 1 ? keys['KeyW'] : keys['ArrowUp'];
+                    const downKey = this.playerNum === 1 ? keys['KeyS'] : keys['ArrowDown'];
+
+                    if (downKey && this.isGrounded) {
+                        this.state = 'crouch';
+                        this.isBlocking = true;
+                        this.vx = 0;
+                    } else {
+                        if (leftKey) {
+                            this.vx = -this.char.speed;
+                            if (this.isGrounded) this.state = 'walk';
+                            // Holding away from opponent also blocks!
+                            if (this.facing === 1 && opponent.state !== 'idle') this.isBlocking = true;
+                        } else if (rightKey) {
+                            this.vx = this.char.speed;
+                            if (this.isGrounded) this.state = 'walk';
+                            if (this.facing === -1 && opponent.state !== 'idle') this.isBlocking = true;
+                        } else {
+                            this.vx = 0;
+                            if (this.isGrounded) this.state = 'idle';
+                        }
+
+                        if (upKey && this.isGrounded) {
+                            this.vy = this.char.jumpPower;
+                            this.state = 'jump';
+                            playSFX('jump');
+                        }
+                    }
+                }
+
+                // Apply Velocity & Gravity
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (!this.isGrounded) {
+                    this.vy += GRAVITY;
+                } else {
+                    this.y = groundY;
+                    this.vy = 0;
+                    if (this.state === 'jump') this.state = 'idle';
+                }
+
+                // Arena boundaries
+                const margin = 45;
+                if (this.x < margin) this.x = margin;
+                if (this.x > arenaWidth - margin) this.x = arenaWidth - margin;
+            }
+
+            checkMeleeHit(opponent) {
+                const reach = (this.state === 'punch' ? 62 : 78) * this.char.reachMult;
+                const attackBox = {
+                    x: this.facing === 1 ? this.x : this.x - reach,
+                    y: this.y - 75 * this.char.heightScale,
+                    w: reach,
+                    h: 55 * this.char.heightScale
+                };
+
+                const target = opponent.hitbox;
+                if (rectsOverlap(attackBox, target)) {
+                    this.hasHitThisAttack = true;
+                    const baseDmg = this.state === 'punch' ? this.char.punchDmg : this.char.kickDmg;
+                    const knockback = this.facing * (this.state === 'punch' ? 6 : 10);
+
+                    // Gain super meter on hit
+                    this.addSuper(18);
+                    opponent.takeDamage(baseDmg, knockback, this.state === 'kick' ? -4 : 0, false);
+                }
+            }
+
+            takeDamage(amount, knockbackX, knockbackY, unblockable) {
+                if (this.isBlocking && !unblockable) {
+                    // Chip damage when blocking
+                    const chip = Math.floor(amount * 0.2);
+                    this.hp = Math.max(0, this.hp - chip);
+                    this.vx = knockbackX * 0.4;
+                    this.addSuper(8);
+                    playSFX('block');
+                    spawnParticles(this.x + this.facing * 15, this.y - 45, '#38bdf8', 8);
+                    spawnFloatingText(this.x, this.y - 85, 'BLOCKED!', '#38bdf8');
+                } else {
+                    this.hp = Math.max(0, this.hp - amount);
+                    this.vx = knockbackX;
+                    if (knockbackY !== 0) this.vy = knockbackY;
+                    this.state = 'hitstun';
+                    this.stateTimer = 14;
+                    this.addSuper(14); // Taking damage also builds comeback super meter
+                    hitStopFrames = 4;
+                    screenShake = Math.max(screenShake, amount > 100 ? 18 : 7);
+                    spawnParticles(this.x, this.y - 45, '#facc15', 14);
+                    spawnFloatingText(this.x, this.y - 85, `-${amount}`, '#ef4444');
+                }
+            }
+
+            addSuper(val) {
+                this.superMeter = Math.min(this.maxSuper, this.superMeter + val);
+            }
+        }
+
+        function rectsOverlap(a, b) {
+            return a.x < b.x + b.w &&
+                   a.x + a.w > b.x &&
+                   a.y < b.y + b.h &&
+                   a.y + a.h > b.y;
+        }
+
+        let player1 = null;
+        let player2 = null;
+
+        /**
+         * ============================================================================
+         * 6. VISUAL EFFECTS: PARTICLES, SHOCKWAVES & ANIME CUT-INS
+         * ============================================================================
+         */
+        function spawnParticles(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 2 + Math.random() * 7;
+                particles.push({
+                    x, y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - 2,
+                    size: 3 + Math.random() * 5,
+                    color,
+                    life: 18 + Math.random() * 12
+                });
+            }
+        }
+
+        function spawnShockwave(x, y, color) {
+            for (let i = 0; i < 24; i++) {
+                particles.push({
+                    x: x + (Math.random() - 0.5) * 40,
+                    y: y - 5,
+                    vx: (Math.random() - 0.5) * 14,
+                    vy: -3 - Math.random() * 9,
+                    size: 5 + Math.random() * 6,
+                    color,
+                    life: 25
+                });
+            }
+        }
+
+        function spawnFloatingText(x, y, text, color) {
+            floatingTexts.push({ x, y, text, color, life: 35 });
+        }
+
+        function showSuperCutIn(fighterName, superName) {
+            const cutin = document.getElementById('super-cutin');
+            document.getElementById('super-cutin-user').textContent = `${fighterName} UNLEASHES`;
+            document.getElementById('super-cutin-name').textContent = `${superName}!`;
+            cutin.classList.remove('hidden');
+            setTimeout(() => {
+                cutin.classList.add('hidden');
+            }, 950);
+        }
+
+        /**
+         * ============================================================================
+         * 7. ANIME ROOFTOP ARENA BACKGROUND RENDERER
+         * ============================================================================
+         */
+        function drawAnimeArena() {
+            // Twilight Anime Sky Gradient
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
+            skyGrad.addColorStop(0, '#090d16');
+            skyGrad.addColorStop(0.55, '#1e1b4b');
+            skyGrad.addColorStop(1, '#7f1d1d');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, arenaWidth, arenaHeight);
+
+            // Giant Glowing Anime Full Moon
+            ctx.save();
+            ctx.fillStyle = '#fef08a';
+            ctx.shadowColor = '#facc15';
+            ctx.shadowBlur = 40;
+            ctx.beginPath();
+            ctx.arc(arenaWidth * 0.5, arenaHeight * 0.26, 58, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // Distant Cyberpunk / Neo-Tokyo City Skyline
+            ctx.fillStyle = '#0f172a';
+            const buildingCount = 14;
+            const bWidth = arenaWidth / buildingCount;
+            for (let i = 0; i < buildingCount; i++) {
+                const bHeight = 90 + ((i * 53) % 130);
+                const bx = i * bWidth;
+                const by = groundY - bHeight;
+                ctx.fillRect(bx, by, bWidth + 2, bHeight);
+
+                // Neon windows
+                ctx.fillStyle = i % 3 === 0 ? '#38bdf8' : '#facc15';
+                for (let wy = by + 12; wy < groundY - 20; wy += 18) {
+                    if ((i + wy) % 2 === 0) {
+                        ctx.fillRect(bx + 10, wy, 6, 8);
+                        ctx.fillRect(bx + bWidth - 18, wy, 6, 8);
+                    }
+                }
+                ctx.fillStyle = '#0f172a';
+            }
+
+            // Dojo Rooftop Floor
+            const floorGrad = ctx.createLinearGradient(0, groundY, 0, arenaHeight);
+            floorGrad.addColorStop(0, '#27272a');
+            floorGrad.addColorStop(1, '#09090b');
+            ctx.fillStyle = floorGrad;
+            ctx.fillRect(0, groundY, arenaWidth, arenaHeight - groundY);
+
+            // Glowing Arena Border Line
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(0, groundY);
+            ctx.lineTo(arenaWidth, groundY);
+            ctx.stroke();
+
+            // Decorative floor tiles perspective
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = 2;
+            for (let x = 0; x <= arenaWidth; x += 60) {
+                ctx.beginPath();
+                ctx.moveTo(x, groundY);
+                ctx.lineTo(x + (x - arenaWidth / 2) * 0.35, arenaHeight);
+                ctx.stroke();
+            }
+        }
+
+        /**
+         * ============================================================================
+         * 8. MAIN GAME LOOP & HUD SYNCHRONIZATION
+         * ============================================================================
+         */
+        function resizeCanvas() {
+            const wrapper = document.getElementById('canvas-wrapper');
+            if (!wrapper) return;
+            arenaWidth = wrapper.clientWidth || window.innerWidth;
+            arenaHeight = wrapper.clientHeight || 450;
+            canvas.width = arenaWidth;
+            canvas.height = arenaHeight;
+            groundY = arenaHeight - 55;
+
+            if (player1 && player1.y > groundY) player1.y = groundY;
+            if (player2 && player2.y > groundY) player2.y = groundY;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function startMatch() {
+            initAudio();
+            playSFX('super');
+
+            document.getElementById('select-screen').classList.add('hidden');
+            document.getElementById('arena-screen').classList.remove('hidden');
+            document.getElementById('btn-char-select').classList.remove('hidden');
+            document.getElementById('ko-overlay').classList.add('hidden');
+
+            resizeCanvas();
+
+            const c1 = ROSTER[p1Selected];
+            const c2 = ROSTER[p2Selected];
+
+            player1 = new Fighter(1, c1, arenaWidth * 0.25, 1);
+            player2 = new Fighter(2, c2, arenaWidth * 0.75, -1);
+
+            document.getElementById('hud-p1-name').textContent = c1.name;
+            document.getElementById('hud-p2-name').textContent = c2.name;
+
+            particles = [];
+            projectiles = [];
+            floatingTexts = [];
+            matchTimer = 99;
+            document.getElementById('hud-timer').textContent = matchTimer;
+            gameActive = true;
+
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (!gameActive || superFreezeTimer > 0) return;
+                matchTimer--;
+                document.getElementById('hud-timer').textContent = matchTimer;
+                if (matchTimer <= 0) {
+                    endMatchByTimeout();
+                }
+            }, 1000);
+        }
+
+        function rematch() {
+            startMatch();
+        }
+
+        function returnToSelect() {
+            gameActive = false;
+            if (timerInterval) clearInterval(timerInterval);
+            document.getElementById('arena-screen').classList.add('hidden');
+            document.getElementById('ko-overlay').classList.add('hidden');
+            document.getElementById('btn-char-select').classList.add('hidden');
+            document.getElementById('select-screen').classList.remove('hidden');
+            p1Locked = false;
+            p2Locked = false;
+            updateSelectPreviews();
+        }
+
+        function updateHUD() {
+            // Player 1 HUD
+            const p1Pct = Math.max(0, (player1.hp / player1.maxHp) * 100);
+            document.getElementById('hud-p1-hp').style.width = `${p1Pct}%`;
+            document.getElementById('hud-p1-hp-text').textContent = `${player1.hp} / ${player1.maxHp}`;
+            document.getElementById('hud-p1-super').style.width = `${player1.superMeter}%`;
+
+            const p1ReadyEl = document.getElementById('hud-p1-super-ready');
+            if (player1.superMeter >= 100) {
+                p1ReadyEl.style.opacity = '1';
+                document.getElementById('hud-p1-super').classList.add('super-ready');
+            } else {
+                p1ReadyEl.style.opacity = '0';
+                document.getElementById('hud-p1-super').classList.remove('super-ready');
+            }
+
+            // Player 2 HUD
+            const p2Pct = Math.max(0, (player2.hp / player2.maxHp) * 100);
+            document.getElementById('hud-p2-hp').style.width = `${p2Pct}%`;
+            document.getElementById('hud-p2-hp-text').textContent = `${player2.hp} / ${player2.maxHp}`;
+            document.getElementById('hud-p2-super').style.width = `${player2.superMeter}%`;
+
+            const p2ReadyEl = document.getElementById('hud-p2-super-ready');
+            if (player2.superMeter >= 100) {
+                p2ReadyEl.style.opacity = '1';
+                document.getElementById('hud-p2-super').classList.add('super-ready');
+            } else {
+                p2ReadyEl.style.opacity = '0';
+                document.getElementById('hud-p2-super').classList.remove('super-ready');
+            }
+        }
+
+        function endMatch(winnerText, titleText = 'K.O.!') {
+            gameActive = false;
+            if (timerInterval) clearInterval(timerInterval);
+            playSFX('ko');
+            document.getElementById('ko-title').textContent = titleText;
+            document.getElementById('ko-subtitle').textContent = winnerText;
+            document.getElementById('ko-overlay').classList.remove('hidden');
+        }
+
+        function endMatchByTimeout() {
+            if (player1.hp > player2.hp) {
+                endMatch(`PLAYER 1 (${player1.char.name}) WINS!`, 'TIME OVER!');
+            } else if (player2.hp > player1.hp) {
+                endMatch(`PLAYER 2 (${player2.char.name}) WINS!`, 'TIME OVER!');
+            } else {
+                endMatch('DOUBLE DRAW!', 'TIME OVER!');
+            }
+        }
+
+        function gameLoop() {
+            requestAnimationFrame(gameLoop);
+            if (document.getElementById('arena-screen').classList.contains('hidden')) return;
+
+            globalTick++;
+
+            // Handle hit-stop freeze frames for crunchy anime impact
+            if (hitStopFrames > 0) {
+                hitStopFrames--;
+                return;
+            }
+
+            // Handle Super Move dramatic pause
+            if (superFreezeTimer > 0) {
+                superFreezeTimer--;
+                drawAnimeArena();
+                drawAnimeCharacter(ctx, player1.char, player1.x, player1.y, player1.facing, globalTick, player1.state, player1.stateTimer, player1.isBlocking);
+                drawAnimeCharacter(ctx, player2.char, player2.x, player2.y, player2.facing, globalTick, player2.state, player2.stateTimer, player2.isBlocking);
+                return;
+            }
+
+            // Update fighters if match is live
+            if (gameActive) {
+                player1.update(player2);
+                player2.update(player1);
+
+                // Update Super Projectiles (Noorain's Mugunchi & Ahmad's Shaker)
+                for (let i = projectiles.length - 1; i >= 0; i--) {
+                    const proj = projectiles[i];
+                    proj.x += proj.vx;
+
+                    const target = proj.owner === 1 ? player2 : player1;
+                    const dist = Math.hypot(proj.x - target.x, proj.y - (target.y - 45));
+
+                    if (dist < proj.radius + 25) {
+                        playSFX('explosion');
+                        screenShake = 24;
+                        hitStopFrames = 8;
+                        target.takeDamage(proj.damage, Math.sign(proj.vx) * 14, -10, true);
+                        spawnParticles(proj.x, proj.y, proj.color, 32);
+                        spawnFloatingText(target.x, target.y - 105, `${proj.name} HIT!!`, proj.color);
+                        projectiles.splice(i, 1);
+                        continue;
+                    }
+
+                    if (proj.x < -100 || proj.x > arenaWidth + 100) {
+                        projectiles.splice(i, 1);
+                    }
+                }
+
+                updateHUD();
+
+                // Check KO condition
+                if (player1.hp <= 0) {
+                    endMatch(`PLAYER 2 (${player2.char.name}) WINS!`);
+                } else if (player2.hp <= 0) {
+                    endMatch(`PLAYER 1 (${player1.char.name}) WINS!`);
+                }
+            }
+
+            // Render Frame with Screen Shake
+            ctx.save();
+            if (screenShake > 0) {
+                const dx = (Math.random() - 0.5) * screenShake;
+                const dy = (Math.random() - 0.5) * screenShake;
+                ctx.translate(dx, dy);
+                screenShake *= 0.85;
+                if (screenShake < 0.5) screenShake = 0;
+            }
+
+            drawAnimeArena();
+
+            // Draw both fighters
+            drawAnimeCharacter(ctx, player1.char, player1.x, player1.y, player1.facing, globalTick, player1.state, player1.stateTimer, player1.isBlocking);
+            drawAnimeCharacter(ctx, player2.char, player2.x, player2.y, player2.facing, globalTick, player2.state, player2.stateTimer, player2.isBlocking);
+
+            // Draw Super Move Projectiles
+            projectiles.forEach(proj => {
+                ctx.save();
+                ctx.fillStyle = proj.color;
+                ctx.shadowColor = proj.color;
+                ctx.shadowBlur = 25;
+                ctx.beginPath();
+                ctx.arc(proj.x, proj.y, proj.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(proj.x, proj.y, proj.radius * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            // Update & Draw Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.25;
+                p.life--;
+
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+
+            // Update & Draw Floating Anime Damage / Callout Texts
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                const ft = floatingTexts[i];
+                ft.y -= 1.2;
+                ft.life--;
+
+                ctx.save();
+                ctx.font = 'bold 22px "Bangers", cursive';
+                ctx.fillStyle = ft.color;
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 4;
+                ctx.textAlign = 'center';
+                ctx.strokeText(ft.text, ft.x, ft.y);
+                ctx.fillText(ft.text, ft.x, ft.y);
+                ctx.restore();
+
+                if (ft.life <= 0) floatingTexts.splice(i, 1);
+            }
+
+            ctx.restore();
+        }
+
+        /**
+         * ============================================================================
+         * 9. KEYBOARD INPUT LISTENERS (CHARACTER SELECT + COMBAT)
+         * ============================================================================
+         */
+        window.addEventListener('keydown', (e) => {
+            // Prevent arrow keys / space from scrolling page
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
+                e.preventDefault();
+            }
+
+            const isRepeat = keys[e.code];
+            keys[e.code] = true;
+            if (isRepeat) return;
+
+            // Character Select Screen keyboard shortcuts
+            if (!document.getElementById('select-screen').classList.contains('hidden')) {
+                if (e.code === 'KeyA' && !p1Locked) {
+                    const idx = (ROSTER_KEYS.indexOf(p1Selected) - 1 + ROSTER_KEYS.length) % ROSTER_KEYS.length;
+                    p1Selected = ROSTER_KEYS[idx];
+                    playSFX('select');
+                    updateSelectPreviews();
+                } else if (e.code === 'KeyD' && !p1Locked) {
+                    const idx = (ROSTER_KEYS.indexOf(p1Selected) + 1) % ROSTER_KEYS.length;
+                    p1Selected = ROSTER_KEYS[idx];
+                    playSFX('select');
+                    updateSelectPreviews();
+                } else if (e.code === 'KeyF') {
+                    toggleLock(1);
+                } else if (e.code === 'ArrowLeft' && !p2Locked) {
+                    const idx = (ROSTER_KEYS.indexOf(p2Selected) - 1 + ROSTER_KEYS.length) % ROSTER_KEYS.length;
+                    p2Selected = ROSTER_KEYS[idx];
+                    playSFX('select');
+                    updateSelectPreviews();
+                } else if (e.code === 'ArrowRight' && !p2Locked) {
+                    const idx = (ROSTER_KEYS.indexOf(p2Selected) + 1) % ROSTER_KEYS.length;
+                    p2Selected = ROSTER_KEYS[idx];
+                    playSFX('select');
+                    updateSelectPreviews();
+                } else if (e.code === 'KeyK') {
+                    toggleLock(2);
+                } else if (e.code === 'Enter') {
+                    startMatch();
+                }
+                return;
+            }
+
+            // Active Fight Combat Inputs
+            if (gameActive && player1 && player2) {
+                // Player 1 Attacks
+                if (e.code === 'KeyF') player1.triggerAttack('punch');
+                if (e.code === 'KeyG') player1.triggerAttack('kick');
+                if (e.code === 'KeyR') player1.triggerSuper(player2);
+
+                // Player 2 Attacks
+                if (e.code === 'KeyK') player2.triggerAttack('punch');
+                if (e.code === 'KeyL') player2.triggerAttack('kick');
+                if (e.code === 'KeyP') player2.triggerSuper(player1);
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+        });
+
+        // Initialize on Window Load
+        window.onload = function () {
+            buildRosterUI();
+            animateSelectPreviews();
+            gameLoop();
+        };
+    </script>
+</body>
+</html>
